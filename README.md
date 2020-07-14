@@ -10,7 +10,7 @@ _Note:_ Some browsers (like Edge) require [WebRTC Adapter shim](https://github.c
 
 ### NPM
 
-`npm install --save instascan`
+`npm install --save @optimistdigital/instascan`
 
 ```javascript
 import Instascan from 'instascan';
@@ -23,7 +23,7 @@ import Instascan from 'instascan';
 Create a new scanner with options:
 
 ```javascript
-let opts = {
+const opts = {
   // Whether to scan continuously for QR codes. If false, use scanner.scan() to manually scan.
   // If true, the scanner emits the "scan" event when a QR code is scanned. Default true.
   continuous: true,
@@ -72,7 +72,7 @@ let opts = {
 - Stop scanning and deactivate the camera. Returns promise.
 - `.then(function () { ... })`: called when camera and scanning have stopped.
 
-### let result = scanner.scan()
+### const result = scanner.scan()
 
 - Scan video immediately for a QR code.
 - QR codes recognized with this method are not emitted via the `scan` event.
