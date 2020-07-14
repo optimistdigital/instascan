@@ -1,7 +1,7 @@
-const EventEmitter = require('events');
-const ZXing = require('./zxing')();
-const Visibility = require('visibilityjs');
-const StateMachine = require('fsm-as-promised');
+import ZXing from 'zxing';
+import EventEmitter from 'events';
+import Visibility from 'visibilityjs';
+import StateMachine from 'fsm-as-promised';
 
 class ScanProvider {
   constructor(emitter, analyzer, captureImage, scanPeriod, refractoryPeriod) {
@@ -95,7 +95,7 @@ class Analyzer {
     this.canvas = document.createElement('canvas');
     this.canvas.style.display = 'none';
     this.canvasContext = null;
-  
+
     if (!Analyzer.decodeCallback) {
       Analyzer.decodeCallback = ZXing.Runtime.addFunction(function (ptr, len, resultIndex, resultCount) {
         let result = new Uint8Array(ZXing.HEAPU8.buffer, ptr, len);
@@ -125,8 +125,8 @@ class Analyzer {
 
       this.sensorWidth = videoWidth;
       this.sensorHeight = videoHeight;
-      this.sensorLeft = Math.floor((videoWidth / 2) - (this.sensorWidth / 2));
-      this.sensorTop = Math.floor((videoHeight / 2) - (this.sensorHeight / 2));
+      this.sensorLeft = Math.floor(videoWidth / 2 - this.sensorWidth / 2);
+      this.sensorTop = Math.floor(videoHeight / 2 - this.sensorHeight / 2);
 
       this.canvas.width = this.sensorWidth;
       this.canvas.height = this.sensorHeight;
@@ -136,13 +136,7 @@ class Analyzer {
       return null;
     }
 
-    this.canvasContext.drawImage(
-      this.video,
-      this.sensorLeft,
-      this.sensorTop,
-      this.sensorWidth,
-      this.sensorHeight
-    );
+    this.canvasContext.drawImage(this.video, this.sensorLeft, this.sensorTop, this.sensorWidth, this.sensorHeight);
 
     let data = this.canvasContext.getImageData(0, 0, this.sensorWidth, this.sensorHeight).data;
     for (let i = 0, j = 0; i < data.length; i += 4, j++) {
@@ -169,15 +163,15 @@ class Scanner extends EventEmitter {
     super();
 
     this.video = this._configureVideo(opts);
-    this.mirror = (opts.mirror !== false);
-    this.backgroundScan = (opts.backgroundScan !== false);
-    this._continuous = (opts.continuous !== false);
+    this.mirror = opts.mirror !== false;
+    this.backgroundScan = opts.backgroundScan !== false;
+    this._continuous = opts.continuous !== false;
     this._analyzer = new Analyzer(this.video);
     this._camera = null;
 
     let captureImage = opts.captureImage || false;
     let scanPeriod = opts.scanPeriod || 1;
-    let refractoryPeriod = opts.refractoryPeriod || (5 * 1000);
+    let refractoryPeriod = opts.refractoryPeriod || 5 * 1000;
 
     this._scanner = new ScanProvider(this, this._analyzer, captureImage, scanPeriod, refractoryPeriod);
     this._fsm = this._createStateMachine();
@@ -325,6 +319,10 @@ class Scanner extends EventEmitter {
 
     let video = opts.video || document.createElement('video');
     video.setAttribute('autoplay', 'autoplay');
+    if (/iP(hone|(o|a)d)/.test(navigator.userAgent)) {
+      video.setAttribute('playsinline', 'playsinline');
+      video.setAttribute('muted', 'muted');
+    }
 
     return video;
   }
@@ -336,12 +334,12 @@ class Scanner extends EventEmitter {
         {
           name: 'start',
           from: 'stopped',
-          to: 'started'
+          to: 'started',
         },
         {
           name: 'stop',
           from: ['started', 'active', 'inactive'],
-          to: 'stopped'
+          to: 'stopped',
         },
         {
           name: 'activate',
@@ -353,16 +351,16 @@ class Scanner extends EventEmitter {
             } else {
               return 'inactive';
             }
-          }
+          },
         },
         {
           name: 'deactivate',
           from: ['started', 'active'],
-          to: 'inactive'
-        }
+          to: 'inactive',
+        },
       ],
       callbacks: {
-        onenteractive: async (options) => {
+        onenteractive: async options => {
           await this._enableScan(options.args[0]);
           this.emit('active');
         },
@@ -370,10 +368,10 @@ class Scanner extends EventEmitter {
           this._disableScan();
           this.emit('inactive');
         },
-        onenteredstarted: async (options) => {
+        onenteredstarted: async options => {
           await this._fsm.activate(options.args[0]);
-        }
-      }
+        },
+      },
     });
   }
 }

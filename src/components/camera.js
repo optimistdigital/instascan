@@ -18,21 +18,16 @@ class Camera {
   }
 
   async start() {
-    let constraints = {
-      audio: false,
-      video: {
-        mandatory: {
-          sourceId: this.id,
-          minWidth: 600,
-          maxWidth: 800,
-          minAspectRatio: 1.6
-        },
-        optional: []
-      }
-    };
-
     this._stream = await Camera._wrapErrors(async () => {
-      return await navigator.mediaDevices.getUserMedia(constraints);
+      return await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          deviceId: {
+            exact: this.id,
+          },
+          facingMode: 'environment',
+        },
+      });
     });
 
     return this._stream;
@@ -50,13 +45,11 @@ class Camera {
     this._stream = null;
   }
 
-  static async getCameras() {
-    await this._ensureAccess();
+  static async getCameras(ensureAccess = false) {
+    if (ensureAccess) await this._ensureAccess();
 
     let devices = await navigator.mediaDevices.enumerateDevices();
-    return devices
-      .filter(d => d.kind === 'videoinput')
-      .map(d => new Camera(d.deviceId, cameraName(d.label)));
+    return devices.filter(d => d.kind === 'videoinput').map(d => new Camera(d.deviceId, cameraName(d.label)));
   }
 
   static async _ensureAccess() {

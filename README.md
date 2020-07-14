@@ -1,63 +1,24 @@
-# ![Instascan](https://raw.githubusercontent.com/schmich/instascan/master/assets/qr.png) Instascan
-Real-time webcam-driven HTML5 QR code scanner. [Try the live demo](https://schmich.github.io/instascan/).
+# Instascan
+
+Real-time webcam-driven HTML5 QR code scanner.
 
 ## Installing
 
-*Note:* Chrome requires HTTPS when using the WebRTC API. Any pages using this library should be served over HTTPS.
+_Note:_ Chrome requires HTTPS when using the WebRTC API. Any pages using this library should be served over HTTPS.
+
+_Note:_ Some browsers (like Edge) require [WebRTC Adapter shim](https://github.com/webrtc/adapter).
 
 ### NPM
 
 `npm install --save instascan`
 
 ```javascript
-const Instascan = require('instascan');
-```
-
-### Bower
-
-Pending. [Drop a note](https://github.com/schmich/instascan/issues/31) if you need Bower support.
-
-### Minified
-
-Copy `instascan.min.js` from the [releases](https://github.com/schmich/instascan/releases) page and load with:
-
-```html
-<script type="text/javascript" src="instascan.min.js"></script>
-```
-
-## Example
-
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Instascan</title>
-    <script type="text/javascript" src="instascan.min.js"></script>
-  </head>
-  <body>
-    <video id="preview"></video>
-    <script type="text/javascript">
-      let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
-      scanner.addListener('scan', function (content) {
-        console.log(content);
-      });
-      Instascan.Camera.getCameras().then(function (cameras) {
-        if (cameras.length > 0) {
-          scanner.start(cameras[0]);
-        } else {
-          console.error('No cameras found.');
-        }
-      }).catch(function (e) {
-        console.error(e);
-      });
-    </script>
-  </body>
-</html>
+import Instascan from 'instascan';
 ```
 
 ## API
 
-### let scanner = new Instascan.Scanner(opts)
+### const scanner = new Instascan.Scanner(opts)
 
 Create a new scanner with options:
 
@@ -66,32 +27,32 @@ let opts = {
   // Whether to scan continuously for QR codes. If false, use scanner.scan() to manually scan.
   // If true, the scanner emits the "scan" event when a QR code is scanned. Default true.
   continuous: true,
-  
+
   // The HTML element to use for the camera's video preview. Must be a <video> element.
   // When the camera is active, this element will have the "active" CSS class, otherwise,
   // it will have the "inactive" class. By default, an invisible element will be created to
   // host the video.
   video: document.getElementById('preview'),
-  
+
   // Whether to horizontally mirror the video preview. This is helpful when trying to
   // scan a QR code with a user-facing camera. Default true.
   mirror: true,
-  
+
   // Whether to include the scanned image data as part of the scan result. See the "scan" event
   // for image format details. Default false.
   captureImage: false,
-  
+
   // Only applies to continuous mode. Whether to actively scan when the tab is not active.
   // When false, this reduces CPU usage when the tab is not active. Default true.
   backgroundScan: true,
-  
+
   // Only applies to continuous mode. The period, in milliseconds, before the same QR code
   // will be recognized in succession. Default 5000 (5 seconds).
   refractoryPeriod: 5000,
-  
+
   // Only applies to continuous mode. The period, in rendered frames, between scans. A lower scan period
   // increases CPU usage but makes scan response faster. Default 1 (i.e. analyze every frame).
-  scanPeriod: 1
+  scanPeriod: 1,
 };
 ```
 
@@ -102,9 +63,10 @@ let opts = {
 - `camera`: Instance of `Instascan.Camera` from [`Instascan.Camera.getCameras`](#instascancameragetcameras).
 - `.then(function () { ... })`: called when camera is active and scanning has started.
 - `.catch(function (err) { ... })`
+
   - Called when an error occurs trying to initialize the camera for scanning.
   - `err`: An `Instascan.MediaError` in the case of a known `getUserMedia` failure ([see error types](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#Errors)).
-  
+
 ### scanner.stop()
 
 - Stop scanning and deactivate the camera. Returns promise.
@@ -161,7 +123,7 @@ let opts = {
 
 Instascan works on non-iOS platforms in [any browser that supports the WebRTC/getUserMedia API](http://caniuse.com/#feat=stream), which currently includes Chome, Firefox, Opera, and Edge. IE and Safari are not supported.
 
-Instascan does not work on iOS since Apple does not yet support WebRTC in WebKit *and* forces other browser vendors (Chrome, Firefox, Opera) to use their implementation of WebKit. [Apple is actively working on WebRTC support in WebKit](https://bugs.webkit.org/show_bug.cgi?id=124288).
+Instascan does not work on iOS since Apple does not yet support WebRTC in WebKit _and_ forces other browser vendors (Chrome, Firefox, Opera) to use their implementation of WebKit. [Apple is actively working on WebRTC support in WebKit](https://bugs.webkit.org/show_bug.cgi?id=124288).
 
 ## Performance
 
@@ -174,7 +136,6 @@ If you control creation of the QR code, consider the following:
 - Include a sufficient quiet zone, the white border surrounding QR code. The quiet zone should be at least four times the width of an individual element in your QR code.
 - A simpler code is better. You can use [this QR code generator](https://www.the-qrcode-generator.com/) to see how your input affects complexity.
 - For the same length, numeric content is simpler than ASCII content, which is simpler than Unicode content.
-- Shorter content is simpler. If you're encoding a URL, consider using a shortener such as [goo.gl](https://goo.gl/) or [bit.ly](https://bitly.com/).
 
 When scanning, consider the following:
 
@@ -188,11 +149,9 @@ When scanning, consider the following:
 ## Example Setup
 
 - Purpose: To scan QR code stickers on paper cards and plastic bags.
-- Camera: [Microsoft LifeCam HD-3000](http://www.newegg.com/Product/Product.aspx?Item=9SIA4RE40S4991), 720p, fixed focus, around $30 USD.
+- Camera: [Microsoft LifeCam HD-3000](http://www.newegg.com/Product/Product.aspx?Item=9SIA4RE40S4991), 720p, fixed focus, around \$30 USD.
 - Small support to ensure camera is focused on subject.
 - White paper backdrop to mitigate exposure adjustment.
-
-![Setup](https://raw.githubusercontent.com/schmich/instascan/master/assets/setup.jpg)
 
 ## Credits
 
@@ -200,5 +159,5 @@ Powered by the [Emscripten JavaScript build](https://github.com/kig/zxing-cpp-em
 
 ## License
 
-Copyright &copy; 2016 Chris Schmich  
+Copyright &copy; 2020 Tarvo Reinpalu
 MIT License. See [LICENSE](LICENSE) for details.
