@@ -13,7 +13,7 @@ _Note:_ Some browsers (like Edge) require [WebRTC Adapter shim](https://github.c
 `npm install --save @optimistdigital/instascan`
 
 ```javascript
-import Instascan from 'instascan';
+import Instascan from '@optimistdigital/instascan';
 ```
 
 ## API
